@@ -38,5 +38,14 @@
   "volta": {
     "node": "24.7.0",
     "pnpm": "10.15.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@warp-drive/core": "link:/Users/leoeuclides/Documents/userlist/data/warp-drive-packages/core",
+      "@warp-drive/ember": "link:/Users/leoeuclides/Documents/userlist/data/warp-drive-packages/ember",
+      "@warp-drive/json-api": "link:/Users/leoeuclides/Documents/userlist/data/warp-drive-packages/json-api",
+      "@warp-drive/utilities": "link:/Users/leoeuclides/Documents/userlist/data/warp-drive-packages/utilities",
+      "@warp-drive/build-config": "link:/Users/leoeuclides/Documents/userlist/data/warp-drive-packages/build-config"
+    }
   }
 }
