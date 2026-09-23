@@ -1,11 +1,16 @@
+import type { TOC } from '@ember/component/template-only';
 import { on } from '@ember/modifier';
 import type RouterService from '@ember/routing/router-service';
 import { service } from '@ember/service';
 import Component from '@glimmer/component';
 
-import type { PaginationContentFeatures } from '@warp-drive/core/reactive';
-import { EachLink } from '@warp-drive/ember';
-import type { PaginationState, RealPaginationLink, RelationalPaginationLink } from '@warp-drive/ember';
+import type {
+  PagedPaginationContentFeatures,
+  PagedPaginationState,
+  RealPaginationLink,
+  RelationalPaginationLink,
+} from '@warp-drive/ember/experiments';
+import { EachLink } from '@warp-drive/ember/experiments';
 
 import type { ReactiveTodosDocument } from '@workspace/shared-data/builders';
 
@@ -14,45 +19,38 @@ import { LoadingSpinner } from '#/components/design-system/loading';
 
 interface Signature {
   Args: {
-    pages: PaginationState<ReactiveTodosDocument>;
-    state: PaginationContentFeatures<ReactiveTodosDocument>;
+    pages: PagedPaginationState<ReactiveTodosDocument>;
+    state: PagedPaginationContentFeatures<ReactiveTodosDocument>;
   };
 }
 
-export class PaginationControls extends Component<Signature> {
-  <template>
-    {{#if (or @pages.hasPrevious @pages.hasNext)}}
+export const PaginationControls: TOC<Signature> = <template>
+  <EachLink @pages={{@pages}} as |links|>
+    {{#if (or links.prev links.next)}}
       <div class="pagination-controls">
         <div class="pagination-link-buttons">
-          <EachLink @pages={{@pages}}>
 
-            <:prev as |link|><NavButton @link={{link}} @page={{prevPage @pages}} /></:prev>
+          {{#if links.prev}}<NavButton @link={{links.prev}} @page={{prevPage @pages}} />{{/if}}
 
-            <:link as |link|>
+          {{#each links.links as |link|}}
+            {{#if link.isReal}}
               {{#if (nearActive link)}}<PageButton @link={{link}} />{{/if}}
-            </:link>
-
-            <:placeholder>
+            {{else}}
               <span class="pagination-button pagination-placeholder-button">⋯</span>
-            </:placeholder>
+            {{/if}}
+          {{/each}}
 
-            <:next as |link|><NavButton @link={{link}} @page={{nextPage @pages}} /></:next>
+          {{#if links.next}}<NavButton @link={{links.next}} @page={{nextPage @pages}} />{{/if}}
 
-          </EachLink>
         </div>
 
-        {{#if this.isLoading}}<LoadingSpinner />{{/if}}
+        {{#if @pages.activePage.isLoading}}<LoadingSpinner />{{/if}}
       </div>
     {{/if}}
-  </template>
+  </EachLink>
+</template>;
 
-  // TODO @runspired work-around for no "page that isn't the prev or next page is loading" state
-  get isLoading() {
-    return [...this.args.pages.pages].some((p) => p.isLoading);
-  }
-}
-
-/** A numbered page link (`:link` block). */
+/** A numbered page link. */
 class PageButton extends Component<{
   Args: {
     link: RealPaginationLink;
@@ -76,7 +74,7 @@ class PageButton extends Component<{
   };
 }
 
-/** A relational prev/next link (`:prev` / `:next` blocks). */
+/** A relational prev/next link. */
 class NavButton extends Component<{
   Args: {
     link: RelationalPaginationLink;
@@ -104,12 +102,12 @@ class NavButton extends Component<{
   };
 }
 
-function prevPage(pages: PaginationState<ReactiveTodosDocument>): number | null {
+function prevPage(pages: PagedPaginationState<ReactiveTodosDocument>): number | null {
   const n = pages.activePage?.pageNumber;
   return n ? n - 1 : null;
 }
 
-function nextPage(pages: PaginationState<ReactiveTodosDocument>): number | null {
+function nextPage(pages: PagedPaginationState<ReactiveTodosDocument>): number | null {
   const n = pages.activePage?.pageNumber;
   return n ? n + 1 : null;
 }

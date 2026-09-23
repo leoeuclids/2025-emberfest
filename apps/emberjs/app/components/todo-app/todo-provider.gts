@@ -1,10 +1,9 @@
 import { service } from '@ember/service';
 import Component from '@glimmer/component';
 
-import type { PaginationContentFeatures } from '@warp-drive/core/reactive';
 import type { Future } from '@warp-drive/core/request';
-import { Paginate } from '@warp-drive/ember';
-import type { PaginationState } from '@warp-drive/ember';
+import type { PagedPaginationContentFeatures, PagedPaginationState } from '@warp-drive/ember/experiments';
+import { Paginate } from '@warp-drive/ember/experiments';
 
 import type { ReactiveTodosDocument } from '@workspace/shared-data/builders';
 import type { Todo } from '@workspace/shared-data/types';
@@ -50,8 +49,8 @@ export class TodoProvider extends Component<Signature> {
 
 class ActivePage extends Component<{
   Args: {
-    pages: PaginationState<ReactiveTodosDocument>;
-    state: PaginationContentFeatures<ReactiveTodosDocument>;
+    pages: PagedPaginationState<ReactiveTodosDocument>;
+    state: PagedPaginationContentFeatures<ReactiveTodosDocument>;
     activePageData: Todo[];
   };
   Blocks: {
@@ -82,6 +81,6 @@ class ActivePage extends Component<{
   }
 
   get showToggle() {
-    return ![...this.args.pages.pages].some((p) => p.isLoading) && this.appState.canToggle;
+    return !this.args.pages.activePage?.isLoading && this.appState.canToggle;
   }
 }
